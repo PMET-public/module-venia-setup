@@ -39,6 +39,7 @@ class InstallData implements Setup\InstallDataInterface
                                 \Magento\Store\Model\WebsiteFactory $websiteFactory,
                                 \Magento\Store\Model\GroupFactory $groupFactory,
                                 \Magento\Store\Model\ResourceModel\Group $groupResourceModel,
+                                \Magento\Catalog\Model\CategoryFactory $categoryFactory,
                                 \Magento\Framework\App\State $state
 
 
@@ -48,6 +49,7 @@ class InstallData implements Setup\InstallDataInterface
         $this->websiteFactory = $websiteFactory;
         $this->groupFactory = $groupFactory;
         $this->groupResourceModel = $groupResourceModel;
+        $this->categoryFactory = $categoryFactory;
         $this->config = require 'Config.php';
         try{
             $state->setAreaCode('adminhtml');
@@ -63,22 +65,25 @@ class InstallData implements Setup\InstallDataInterface
     public function install(Setup\ModuleDataSetupInterface $setup, Setup\ModuleContextInterface $moduleContext)
     {
         //create root catalog
+        $rootCategoryId = $this->createCategory();
 
         //TODO:set default store view for venia store
 
         //get website
-        $website = $this->websiteFactory->create();
+       $website = $this->websiteFactory->create();
         $website->load($this->config['website']);
 
         //create venia group
         if($website->getId()){
-            /** @var \Magento\Store\Model\Group $group */
+
             $group = $this->groupFactory->create();
             $group->setWebsiteId($website->getWebsiteId());
             $group->setName($this->config['groupName']);
-           // $group->setRootCategoryId(2);
+            $group->setRootCategoryId($rootCategoryId);
             //$group->setDefaultStoreId(3);
             $this->groupResourceModel->save($group);
+
+            //create view
             $newStore = $this->storeView->create();
             $newStore->setName($this->config['newViewName']);
             $newStore->setCode($this->config['newViewCode']);
@@ -87,37 +92,31 @@ class InstallData implements Setup\InstallDataInterface
             $newStore->setSortOrder($this->config['newViewPriority']);
             $newStore->setIsActive(true);
             $newStore->save();
+            //assign view as default on Venia store
+            $group->setDefaultStoreId($newStore->getId());
+            $group->save();
         }else{
             throw new \Magento\Framework\Exception\LocalizedException(__("default website does not exist, or venia already created"));
 
         }
 
-        //$websiteId = $this->websiteRepository->get($this->config['website'])->getId();
+    }
+    protected function createCategory()
+    {
+          $data = [
+                'parent_id' => 1,
+                'name' => $this->config['rootCategoryName'],
+                'is_active' => 'Yes',
+                'is_anchor' => 'Yes',
+                'include_in_menu' => 'N',
+                'position'=>10
+            ];
+            $category = $this->categoryFactory->create();
+            $category->setData($data)
+            ->setPath('1')
+            ->setAttributeSetId($category->getDefaultAttributeSetId());
+            $category->save();
+            return $category->getId();
 
-        //get groups (stores in website)
-        //$_websiteGroups = $this->website->load($this->config['website'])->getGroups();
-
-        //get id of group
-        /*foreach ($_websiteGroups as $group){
-            if($group->getName()==$this->config['groupName']){
-                $_groupId = $group->getId();
-                break;
-            }
-        }*/
-        //Change name of default store
-        /*$defaultStore = $this->storeView->create();
-        $defaultStore->load('default');
-        $defaultStore->setName($this->config['defaultStoreName']);
-        $defaultStore->save();*/
-
-        //add new store
-        /*$newStore = $this->storeView->create();
-        $newStore->setName($this->config['newViewName']);
-        $newStore->setCode($this->config['newViewCode']);
-        $newStore->setWebsiteId($websiteId);
-        $newStore->setGroupId($_groupId); // GroupId is a Store ID (in adminhtml terms)
-        $newStore->setSortOrder($this->config['newViewPriority']);
-        $newStore->setIsActive(true);
-        $newStore->save();*/
     }
 }
