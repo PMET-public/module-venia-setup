@@ -106,9 +106,9 @@ class InstallData implements Setup\InstallDataInterface
           $data = [
                 'parent_id' => 1,
                 'name' => $this->config['rootCategoryName'],
-                'is_active' => 'Yes',
-                'is_anchor' => 'Yes',
-                'include_in_menu' => 'N',
+                'is_active' => 1,
+                'is_anchor' => 1,
+                'include_in_menu' => 0,
                 'position'=>10
             ];
             $category = $this->categoryFactory->create();
