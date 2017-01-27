@@ -11,17 +11,17 @@ use Magento\Framework\Setup;
 class InstallData implements Setup\InstallDataInterface
 {
     /**
-     * @var \Magento\Store\Model\StoreFactory
+     * @var \Magento\Store\Api\Data\StoreInterfaceFactory
      */
     private $storeView;
 
     /**
-     * @var \Magento\Store\Model\WebsiteFactory
+     * @var \Magento\Store\Api\Data\WebsiteInterfaceFactory
      */
     private $websiteFactory;
 
     /**
-     * @var \Magento\Store\Model\GroupFactory
+     * @var  \Magento\Store\Api\Data\GroupInterfaceFactory
      */
     private $groupFactory;
 
@@ -31,16 +31,31 @@ class InstallData implements Setup\InstallDataInterface
     private $groupResourceModel;
 
     /**
+     * @var  \Magento\Catalog\Api\Data\CategoryInterfaceFactory
+     */
+    private $categoryFactory;
+
+    /**
      * @var \Magento\Framework\App\State
      */
     private $state;
 
-    public function __construct(\Magento\Store\Model\StoreFactory $storeView,
-                                \Magento\Store\Model\WebsiteFactory $websiteFactory,
-                                \Magento\Store\Model\GroupFactory $groupFactory,
-                                \Magento\Store\Model\ResourceModel\Group $groupResourceModel,
-                                \Magento\Catalog\Model\CategoryFactory $categoryFactory,
-                                \Magento\Framework\App\State $state
+    /**
+     * @param  \Magento\Store\Api\Data\StoreInterfaceFactory $storeView
+     * @param  \Magento\Store\Api\Data\WebsiteInterfaceFactory $websiteFactory
+     * @param  \Magento\Store\Api\Data\GroupInterfaceFactory $groupFactory
+     * @param  \Magento\Store\Model\ResourceModel\Group $groupResourceModel
+     * @param  \Magento\Catalog\Api\Data\CategoryInterfaceFactory $categoryFactory
+     * @param  \Magento\Framework\App\State $state
+     */
+
+    public function __construct(
+        \Magento\Store\Api\Data\StoreInterfaceFactory $storeView,
+        \Magento\Store\Api\Data\WebsiteInterfaceFactory $websiteFactory,
+        \Magento\Store\Api\Data\GroupInterfaceFactory $groupFactory,
+        \Magento\Store\Model\ResourceModel\Group $groupResourceModel,
+        \Magento\Catalog\Api\Data\CategoryInterfaceFactory $categoryFactory,
+        \Magento\Framework\App\State $state
 
 
     )
@@ -67,7 +82,7 @@ class InstallData implements Setup\InstallDataInterface
         //create root catalog
         $rootCategoryId = $this->createCategory();
 
-        //TODO:set default store view for venia store
+        //TODO:set default theme for venia store
 
         //get website
        $website = $this->websiteFactory->create();
@@ -80,7 +95,6 @@ class InstallData implements Setup\InstallDataInterface
             $group->setWebsiteId($website->getWebsiteId());
             $group->setName($this->config['groupName']);
             $group->setRootCategoryId($rootCategoryId);
-            //$group->setDefaultStoreId(3);
             $this->groupResourceModel->save($group);
 
             //create view
