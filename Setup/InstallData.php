@@ -123,9 +123,11 @@ class InstallData implements Setup\InstallDataInterface
                 'is_active' => 1,
                 'is_anchor' => 1,
                 'include_in_menu' => 0,
-                'position'=>10
+                'position'=>10,
+                'store_id'=>0
             ];
             $category = $this->categoryFactory->create();
+            $foo=$category->getDefaultAttributeSetId();
             $category->setData($data)
             ->setPath('1')
             ->setAttributeSetId($category->getDefaultAttributeSetId());
