@@ -1,73 +1,99 @@
 <?php
 /**
- * Copyright © 2016 Magento. All rights reserved.
- * See COPYING.txt for license details.
+ * Configuration for Venia Store
+ *
+ * @category Sample_Data
+ * @package  MagentoEse_VeniaSetup
+ * @author   Jeff Britts <jbritts@magento.com>
+ * @license  See COPYING.txt for license details.
+ * @link     http://magento.com
+ * Copyright © 2017 Magento. All rights reserved.
  */
 namespace MagentoEse\VeniaSetup\Setup;
 
 use Magento\Framework\Setup;
 
-
+/**
+ * InstallData Class
+ *
+ * @category Sample_Data
+ * @package  MagentoEse_VeniaSetup
+ * @author   Jeff Britts <jbritts@magento.com>
+ * @license  See COPYING.txt for license details.
+ * @link     http://magento.com
+ * Copyright © 2017 Magento. All rights reserved.
+ */
 class InstallData implements Setup\InstallDataInterface
 {
     /**
+     * Store View
+     *
      * @var \Magento\Store\Api\Data\StoreInterfaceFactory
      */
-    private $storeView;
+    private $_storeView;
 
     /**
+     * Website Factory
+     *
      * @var \Magento\Store\Api\Data\WebsiteInterfaceFactory
      */
-    private $websiteFactory;
+    private $_websiteFactory;
 
     /**
-     * @var  \Magento\Store\Api\Data\GroupInterfaceFactory
+     * Group Factory
+     *
+     * @var \Magento\Store\Api\Data\GroupInterfaceFactory
      */
-    private $groupFactory;
+    private $_groupFactory;
 
     /**
+     * Group Resource
+     *
      * @var \Magento\Store\Model\ResourceModel\Group
      */
-    private $groupResourceModel;
+    private $_groupResourceModel;
 
     /**
-     * @var  \Magento\Catalog\Api\Data\CategoryInterfaceFactory
+     * Category Factory
+     *
+     * @var \Magento\Catalog\Api\Data\CategoryInterfaceFactory
      */
-    private $categoryFactory;
+    private $_categoryFactory;
 
     /**
+     * Area Code
+     *
      * @var \Magento\Framework\App\State
      */
-    private $state;
+    private $_state;
 
     /**
-     * @param  \Magento\Store\Api\Data\StoreInterfaceFactory $storeView
-     * @param  \Magento\Store\Api\Data\WebsiteInterfaceFactory $websiteFactory
-     * @param  \Magento\Store\Api\Data\GroupInterfaceFactory $groupFactory
-     * @param  \Magento\Store\Model\ResourceModel\Group $groupResourceModel
-     * @param  \Magento\Catalog\Api\Data\CategoryInterfaceFactory $categoryFactory
-     * @param  \Magento\Framework\App\State $state
+     * Constructor
+     *
+     * @param \Magento\Store\Api\Data\StoreInterfaceFactory      $_storeView          Store View
+     * @param \Magento\Store\Api\Data\WebsiteInterfaceFactory    $_websiteFactory     Website Factory
+     * @param \Magento\Store\Api\Data\GroupInterfaceFactory      $_groupFactory       Group Factory
+     * @param \Magento\Store\Model\ResourceModel\Group           $_groupResourceModel Group ResourceModel
+     * @param \Magento\Catalog\Api\Data\CategoryInterfaceFactory $_categoryFactory    Category Factory
+     * @param \Magento\Framework\App\State                       $_state              Area Code
      */
-
     public function __construct(
-        \Magento\Store\Api\Data\StoreInterfaceFactory $storeView,
-        \Magento\Store\Api\Data\WebsiteInterfaceFactory $websiteFactory,
-        \Magento\Store\Api\Data\GroupInterfaceFactory $groupFactory,
-        \Magento\Store\Model\ResourceModel\Group $groupResourceModel,
-        \Magento\Catalog\Api\Data\CategoryInterfaceFactory $categoryFactory,
-        \Magento\Framework\App\State $state
-
-
-    )
-    {
-        $this->storeView = $storeView;
-        $this->websiteFactory = $websiteFactory;
-        $this->groupFactory = $groupFactory;
-        $this->groupResourceModel = $groupResourceModel;
-        $this->categoryFactory = $categoryFactory;
-        $this->config = require 'Config.php';
+        \Magento\Store\Api\Data\StoreInterfaceFactory $_storeView,
+        \Magento\Store\Api\Data\WebsiteInterfaceFactory $_websiteFactory,
+        \Magento\Store\Api\Data\GroupInterfaceFactory $_groupFactory,
+        \Magento\Store\Model\ResourceModel\Group $_groupResourceModel,
+        \Magento\Catalog\Api\Data\CategoryInterfaceFactory $_categoryFactory,
+        \Magento\Framework\App\State $_state
+    ) {
+    
+        $this->storeView = $_storeView;
+        $this->websiteFactory = $_websiteFactory;
+        $this->groupFactory = $_groupFactory;
+        $this->groupResourceModel = $_groupResourceModel;
+        $this->categoryFactory = $_categoryFactory;
+        $this->config = include 'Config.php';
         try{
-            $state->setAreaCode('adminhtml');
+            $_state->setAreaCode('adminhtml');
         }
         catch(\Magento\Framework\Exception\LocalizedException $e){
             // left empty
@@ -75,22 +101,31 @@ class InstallData implements Setup\InstallDataInterface
     }
 
 
-
-
-    public function install(Setup\ModuleDataSetupInterface $setup, Setup\ModuleContextInterface $moduleContext)
-    {
+    /**
+     * Install - Create Root Catalog, Group, View
+     *
+     * @param Setup\ModuleDataSetupInterface $setup         Setup
+     * @param Setup\ModuleContextInterface   $moduleContext Module Context
+     * 
+     * @throws \Magento\Framework\Exception\LocalizedException
+     *
+     * @return null
+     */
+    public function install(Setup\ModuleDataSetupInterface $setup,
+        Setup\ModuleContextInterface $moduleContext
+    ) {
+    
         //create root catalog
         $rootCategoryId = $this->createCategory();
 
         //TODO:set default theme for venia store
 
         //get website
-       $website = $this->websiteFactory->create();
+        $website = $this->websiteFactory->create();
         $website->load($this->config['website']);
 
         //create venia group
-        if($website->getId()){
-
+        if ($website->getId()) {
             $group = $this->groupFactory->create();
             $group->setWebsiteId($website->getWebsiteId());
             $group->setName($this->config['groupName']);
@@ -102,19 +137,26 @@ class InstallData implements Setup\InstallDataInterface
             $newStore->setName($this->config['newViewName']);
             $newStore->setCode($this->config['newViewCode']);
             $newStore->setWebsiteId($website->getId());
-            $newStore->setGroupId($group->getId()); // GroupId is a Store ID (in adminhtml terms)
+            // GroupId is a Store ID (in adminhtml terms)
+            $newStore->setGroupId($group->getId());
             $newStore->setSortOrder($this->config['newViewPriority']);
             $newStore->setIsActive(true);
             $newStore->save();
             //assign view as default on Venia store
             $group->setDefaultStoreId($newStore->getId());
             $group->save();
-        }else{
+        } else {
             throw new \Magento\Framework\Exception\LocalizedException(__("default website does not exist, or venia already created"));
 
         }
 
     }
+
+    /**
+     * Creates Category and returns new category id
+     *
+     * @return int|null
+     */
     protected function createCategory()
     {
           $data = [
@@ -129,8 +171,8 @@ class InstallData implements Setup\InstallDataInterface
             $category = $this->categoryFactory->create();
             $foo=$category->getDefaultAttributeSetId();
             $category->setData($data)
-            ->setPath('1')
-            ->setAttributeSetId($category->getDefaultAttributeSetId());
+                ->setPath('1')
+                ->setAttributeSetId($category->getDefaultAttributeSetId());
             $category->save();
             return $category->getId();
 
