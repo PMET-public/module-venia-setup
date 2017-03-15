@@ -68,6 +68,28 @@ class InstallData implements Setup\InstallDataInterface
     private $_state;
 
     /**
+     * Resource Configuration
+     *
+     * @var \Magento\Config\Model\ResourceModel\Config
+     */
+    private $resourceConfig;
+
+    /**
+     * Theme Collection
+     *
+     * @var \Magento\Theme\Model\ResourceModel\Theme\Collection
+     */
+    private $themeCollection;
+
+    /**
+     * Theme registration
+     *
+     * @var \Magento\Theme\Model\Theme\Registration
+     */
+    private $themeRegistration;
+
+
+    /**
      * Constructor
      *
      * @param \Magento\Store\Api\Data\StoreInterfaceFactory      $_storeView          Store View
@@ -76,6 +98,9 @@ class InstallData implements Setup\InstallDataInterface
      * @param \Magento\Store\Model\ResourceModel\Group           $_groupResourceModel Group ResourceModel
      * @param \Magento\Catalog\Api\Data\CategoryInterfaceFactory $_categoryFactory    Category Factory
      * @param \Magento\Framework\App\State                       $_state              Area Code
+     * @param \Magento\Config\Model\ResourceModel\Config         $resourceConfig      Resoource config
+     * @param \Magento\Theme\Model\ResourceModel\Theme\Collection $themeCollection    Theme Collection
+     * @param \Magento\Theme\Model\Theme\Registration            $themeRegistration   Theme Registration
      */
     public function __construct(
         \Magento\Store\Api\Data\StoreInterfaceFactory $_storeView,
@@ -83,7 +108,10 @@ class InstallData implements Setup\InstallDataInterface
         \Magento\Store\Api\Data\GroupInterfaceFactory $_groupFactory,
         \Magento\Store\Model\ResourceModel\Group $_groupResourceModel,
         \Magento\Catalog\Api\Data\CategoryInterfaceFactory $_categoryFactory,
-        \Magento\Framework\App\State $_state
+        \Magento\Framework\App\State $_state,
+        \Magento\Config\Model\ResourceModel\Config $resourceConfig,
+        \Magento\Theme\Model\ResourceModel\Theme\Collection $themeCollection,
+        \Magento\Theme\Model\Theme\Registration $themeResistration
     ) {
     
         $this->storeView = $_storeView;
@@ -92,6 +120,9 @@ class InstallData implements Setup\InstallDataInterface
         $this->groupResourceModel = $_groupResourceModel;
         $this->categoryFactory = $_categoryFactory;
         $this->config = include 'Config.php';
+        $this->_resourceConfig = $resourceConfig;
+        $this->themeCollection = $themeCollection;
+        $this->themeRegistration = $themeResistration;
         try{
             $_state->setAreaCode('adminhtml');
         }
@@ -145,6 +176,18 @@ class InstallData implements Setup\InstallDataInterface
             //assign view as default on Venia store
             $group->setDefaultStoreId($newStore->getId());
             $group->save();
+
+            //make sure theme is registered
+            $this->themeRegistration->register();
+            $themeId = $this->themeCollection->getThemeByFullPath('frontend/MagentoEse/venia')->getThemeId();
+            //set theme for Venia store
+            $this->_resourceConfig->saveConfig("design/theme/theme_id", $themeId, "stores", $newStore->getId());
+            //set venia description used by store switcher
+            $this->_resourceConfig->saveConfig("general/store_information/description", $this->config['veniaDescription'], "stores", $newStore->getId());
+            //set luma description used by store switcher
+            $lumaStore = $this->storeView->create();
+            $lumaStoreId=$lumaStore->load('default')->getId();
+            $this->_resourceConfig->saveConfig("general/store_information/description", $this->config['lumaDescription'], "stores", $lumaStoreId);
         } else {
             throw new \Magento\Framework\Exception\LocalizedException(__("default website does not exist, or venia already created"));
 
