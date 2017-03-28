@@ -13,6 +13,7 @@
             <module name="Magento_Catalog"/>
             <module name="Magento_Theme"/>
             <module name="Magento_Config"/>
+            <module name="MagentoEse_LookBook"/>
         </sequence>
     </module>
 </config>
