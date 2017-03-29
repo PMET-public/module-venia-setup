@@ -88,6 +88,22 @@ class InstallData implements Setup\InstallDataInterface
      */
     private $themeRegistration;
 
+    /**
+     * Sales setup factory
+     *
+     * @var \Magento\SalesSequence\Model\EntityPool
+     */
+    private $entityPool;
+
+    /**
+     * @var \Magento\SalesSequence\Model\Builder
+     */
+    private $sequenceBuilder;
+
+    /**
+     * @var \Magento\SalesSequence\Model\Config
+     */
+    private $sequenceConfig;
 
     /**
      * Constructor
@@ -101,6 +117,9 @@ class InstallData implements Setup\InstallDataInterface
      * @param \Magento\Config\Model\ResourceModel\Config         $resourceConfig      Resoource config
      * @param \Magento\Theme\Model\ResourceModel\Theme\Collection $themeCollection    Theme Collection
      * @param \Magento\Theme\Model\Theme\Registration            $themeRegistration   Theme Registration
+     * @param \Magento\SalesSequence\Model\EntityPool             $entityPool           Entity Pool
+     * @param \Magento\SalesSequence\Model\Builder              $sequenceBuilder       Sequence Builder
+     * @param  \Magento\SalesSequence\Model\Config              $sequenceConfig         Sequence Config
      */
     public function __construct(
         \Magento\Store\Api\Data\StoreInterfaceFactory $_storeView,
@@ -111,7 +130,10 @@ class InstallData implements Setup\InstallDataInterface
         \Magento\Framework\App\State $_state,
         \Magento\Config\Model\ResourceModel\Config $resourceConfig,
         \Magento\Theme\Model\ResourceModel\Theme\Collection $themeCollection,
-        \Magento\Theme\Model\Theme\Registration $themeResistration
+        \Magento\Theme\Model\Theme\Registration $themeRegistration,
+        \Magento\SalesSequence\Model\EntityPool $entityPool,
+        \Magento\SalesSequence\Model\Builder $sequenceBuilder,
+        \Magento\SalesSequence\Model\Config $sequenceConfig
     ) {
     
         $this->storeView = $_storeView;
@@ -122,7 +144,10 @@ class InstallData implements Setup\InstallDataInterface
         $this->config = include 'Config.php';
         $this->_resourceConfig = $resourceConfig;
         $this->themeCollection = $themeCollection;
-        $this->themeRegistration = $themeResistration;
+        $this->themeRegistration = $themeRegistration;
+        $this->entityPool = $entityPool;
+        $this->sequenceBuilder = $sequenceBuilder;
+        $this->sequenceConfig = $sequenceConfig;
         try{
             $_state->setAreaCode('adminhtml');
         }
@@ -149,19 +174,19 @@ class InstallData implements Setup\InstallDataInterface
         //create root catalog
         $rootCategoryId = $this->createCategory();
 
-        //TODO:set default theme for venia store
 
         //get website
         $website = $this->websiteFactory->create();
         $website->load($this->config['website']);
 
-        //create venia group
+        //create venia group/store
         if ($website->getId()) {
             $group = $this->groupFactory->create();
             $group->setWebsiteId($website->getWebsiteId());
             $group->setName($this->config['groupName']);
             $group->setRootCategoryId($rootCategoryId);
             $this->groupResourceModel->save($group);
+
 
             //create view
             $newStore = $this->storeView->create();
@@ -176,6 +201,17 @@ class InstallData implements Setup\InstallDataInterface
             //assign view as default on Venia store
             $group->setDefaultStoreId($newStore->getId());
             $group->save();
+            //add sequences
+            foreach ($this->entityPool->getEntities() as $entityType) {
+                $this->sequenceBuilder->setPrefix($this->sequenceConfig->get('prefix'))
+                    ->setSuffix($this->sequenceConfig->get('suffix'))
+                    ->setStartValue($this->sequenceConfig->get('startValue'))
+                    ->setStoreId($newStore->getId())
+                    ->setStep($this->sequenceConfig->get('step'))
+                    ->setWarningValue($this->sequenceConfig->get('warningValue'))
+                    ->setMaxValue($this->sequenceConfig->get('maxValue'))
+                    ->setEntityType($entityType)->create();
+            }
 
             //make sure theme is registered
             $this->themeRegistration->register();
