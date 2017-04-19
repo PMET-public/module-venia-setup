@@ -9,11 +9,37 @@
     <module name="MagentoEse_VeniaSetup" setup_version="0.0.1">
         <sequence>
             <module name="Magento_SampleData"/>
-            <module name="Magento_Store"/>
-            <module name="Magento_Catalog"/>
-            <module name="Magento_Theme"/>
-            <module name="Magento_Config"/>
-            <module name="MagentoEse_LookBook"/>
+            <module name="Magento_CmsSampleData"/>
+            <module name="Magento_WebsiteRestriction"/>
+            <module name="Magento_Reward"/>
+            <module name="Magento_BundleSampleData"/>
+            <module name="Magento_CatalogRuleSampleData"/>
+            <module name="Magento_CatalogSampleData"/>
+            <module name="Magento_ConfigurableSampleData"/>
+            <module name="Magento_CustomerBalanceSampleData"/>
+            <module name="Magento_CustomerSampleData"/>
+            <module name="Magento_DownloadableSampleData"/>
+            <module name="Magento_GiftCardSampleData"/>
+            <module name="Magento_GiftRegistrySampleData"/>
+            <module name="Magento_GroupedProductSampleData"/>
+            <module name="Magento_MsrpSampleData"/>
+            <module name="Magento_MultipleWishlistSampleData"/>
+            <module name="Magento_OfflineShippingSampleData"/>
+            <module name="Magento_ProductLinksSampleData"/>
+            <module name="Magento_ReviewSampleData"/>
+            <module name="Magento_SalesRuleSampleData"/>
+            <module name="Magento_SalesSampleData"/>
+            <module name="Magento_SwatchesSampleData"/>
+            <module name="Magento_TargetRuleSampleData"/>
+            <module name="Magento_TaxSampleData"/>
+            <module name="Magento_ThemeSampleData"/>
+            <module name="Magento_WidgetSampleData"/>
+            <module name="Magento_WishlistSampleData"/>
+            <module name="MagentoEse_ProductBadge"/>
+            <module name="MagentoEse_ProductBadgeSampleData"/>
+            <module name="MagentoEse_InStorePickup"/>
+            <module name="MagentoEse_InStorePickupSampleData"/>
+            <module name="MagentoEse_LumaDESetup"/>
         </sequence>
     </module>
 </config>
