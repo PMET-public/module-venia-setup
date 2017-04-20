@@ -40,6 +40,7 @@
             <module name="MagentoEse_InStorePickup"/>
             <module name="MagentoEse_InStorePickupSampleData"/>
             <module name="MagentoEse_LumaDESetup"/>
+            <module name="MagentoEse_InstallationOverrides"/>
         </sequence>
     </module>
 </config>
