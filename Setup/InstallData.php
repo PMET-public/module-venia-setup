@@ -172,7 +172,7 @@ class InstallData implements Setup\InstallDataInterface
     ) {
     
         //create root catalog
-        //$rootCategoryId = $this->createCategory();
+        $rootCategoryId = $this->createCategory();
 
 
         //get website
@@ -184,7 +184,7 @@ class InstallData implements Setup\InstallDataInterface
             $group = $this->groupFactory->create();
             $group->setWebsiteId($website->getWebsiteId());
             $group->setName($this->config['groupName']);
-            //$group->setRootCategoryId($rootCategoryId);
+            $group->setRootCategoryId($rootCategoryId);
             $this->groupResourceModel->save($group);
 
 
