@@ -47,6 +47,7 @@
             <module name="MagentoEse_LumaDEWidget"/>
             <module name="MagentoEse_InstallationOverrides"/>
             <module name="MagentoEse_LookBook"/>
+            <module name="Magento_VisualMerchandiser"/>
         </sequence>
     </module>
 </config>
