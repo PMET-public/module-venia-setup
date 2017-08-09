@@ -185,6 +185,7 @@ class InstallData implements Setup\InstallDataInterface
             $group->setWebsiteId($website->getWebsiteId());
             $group->setName($this->config['groupName']);
             $group->setRootCategoryId($rootCategoryId);
+            $group->setCode($this->config['newGroupCode']);
             $this->groupResourceModel->save($group);
 
 

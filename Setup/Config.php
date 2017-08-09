@@ -2,6 +2,7 @@
 return array (
     'website'=>'base',
     'groupName'=>'Venia',
+    'newGroupCode'=>'venia',
     'newViewCode'=>'venia_us',
     'newViewName'=>'US English',
     'newViewPriority'=>10,
