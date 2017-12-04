@@ -21,7 +21,7 @@
             <module name="Magento_DownloadableSampleData"/>
             <module name="Magento_GiftCardSampleData"/>
             <module name="Magento_GiftRegistrySampleData"/>
-            <module name="Magento_GroupedSampleData"/>
+            <module name="Magento_GroupedProductSampleData"/>
             <module name="Magento_MsrpSampleData"/>
             <module name="Magento_MultipleWishlistSampleData"/>
             <module name="Magento_OfflineShippingSampleData"/>
