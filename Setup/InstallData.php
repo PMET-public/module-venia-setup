@@ -181,33 +181,33 @@ class InstallData implements Setup\InstallDataInterface
 
         //create venia group/store
         if ($website->getId()) {
-            $group = $this->groupFactory->create();
-            $group->setWebsiteId($website->getWebsiteId());
-            $group->setName($this->config['groupName']);
-            $group->setRootCategoryId($rootCategoryId);
-            $group->setCode($this->config['newGroupCode']);
-            $this->groupResourceModel->save($group);
-
-
-            //create view
-            $newStore = $this->storeView->create();
-            $newStore->setName($this->config['newViewName']);
-            $newStore->setCode($this->config['newViewCode']);
-            $newStore->setWebsiteId($website->getId());
-            // GroupId is a Store ID (in adminhtml terms)
-            $newStore->setGroupId($group->getId());
-            $newStore->setSortOrder($this->config['newViewPriority']);
-            $newStore->setIsActive(true);
-            $newStore->save();
-            //assign view as default on Venia store
-            $group->setDefaultStoreId($newStore->getId());
-            $group->save();
-            //add sequences
+//            $group = $this->groupFactory->create();
+//            $group->setWebsiteId($website->getWebsiteId());
+//            $group->setName($this->config['groupName']);
+//            $group->setRootCategoryId($rootCategoryId);
+//            $group->setCode($this->config['newGroupCode']);
+//            $this->groupResourceModel->save($group);
+//
+//
+//            //create view
+//            $newStore = $this->storeView->create();
+//            $newStore->setName($this->config['newViewName']);
+//            $newStore->setCode($this->config['newViewCode']);
+//            $newStore->setWebsiteId($website->getId());
+//            // GroupId is a Store ID (in adminhtml terms)
+//            $newStore->setGroupId($group->getId());
+//            $newStore->setSortOrder($this->config['newViewPriority']);
+//            $newStore->setIsActive(true);
+//            $newStore->save();
+//            //assign view as default on Venia store
+//            $group->setDefaultStoreId(3);
+//            $group->save();
+//            //add sequences
             foreach ($this->entityPool->getEntities() as $entityType) {
                 $this->sequenceBuilder->setPrefix($this->sequenceConfig->get('prefix'))
                     ->setSuffix($this->sequenceConfig->get('suffix'))
                     ->setStartValue($this->sequenceConfig->get('startValue'))
-                    ->setStoreId($newStore->getId())
+                    ->setStoreId(3)
                     ->setStep($this->sequenceConfig->get('step'))
                     ->setWarningValue($this->sequenceConfig->get('warningValue'))
                     ->setMaxValue($this->sequenceConfig->get('maxValue'))
@@ -218,9 +218,9 @@ class InstallData implements Setup\InstallDataInterface
             $this->themeRegistration->register();
             $themeId = $this->themeCollection->getThemeByFullPath('frontend/MagentoEse/venia')->getThemeId();
             //set theme for Venia store
-            $this->_resourceConfig->saveConfig("design/theme/theme_id", $themeId, "stores", $newStore->getId());
+            $this->_resourceConfig->saveConfig("design/theme/theme_id", $themeId, "stores", 3);
             //set venia description used by store switcher
-            $this->_resourceConfig->saveConfig("general/store_information/description", $this->config['veniaDescription'], "stores", $newStore->getId());
+            $this->_resourceConfig->saveConfig("general/store_information/description", $this->config['veniaDescription'], "stores", 3);
             //set luma description used by store switcher
             $lumaStore = $this->storeView->create();
             $lumaStoreId=$lumaStore->load('default')->getId();
