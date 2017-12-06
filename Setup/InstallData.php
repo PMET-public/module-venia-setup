@@ -12,6 +12,8 @@
 namespace MagentoEse\VeniaSetup\Setup;
 
 use Magento\Framework\Setup;
+use Magento\Store\Api\GroupRepositoryInterface;
+use Magento\Store\Api\StoreRepositoryInterface;
 
 /**
  * InstallData Class
@@ -31,6 +33,11 @@ class InstallData implements Setup\InstallDataInterface
      * @var \Magento\Store\Api\Data\StoreInterfaceFactory
      */
     private $_storeView;
+
+    /**
+     * @var \Magento\Store\Api\StoreRepositoryInterfaceFactory
+     */
+    private $storeRepositoryFactory;
 
     /**
      * Website Factory
@@ -106,25 +113,28 @@ class InstallData implements Setup\InstallDataInterface
     private $sequenceConfig;
 
     /**
-     * Constructor
-     *
-     * @param \Magento\Store\Api\Data\StoreInterfaceFactory      $_storeView          Store View
-     * @param \Magento\Store\Api\Data\WebsiteInterfaceFactory    $_websiteFactory     Website Factory
-     * @param \Magento\Store\Api\Data\GroupInterfaceFactory      $_groupFactory       Group Factory
-     * @param \Magento\Store\Model\ResourceModel\Group           $_groupResourceModel Group ResourceModel
-     * @param \Magento\Catalog\Api\Data\CategoryInterfaceFactory $_categoryFactory    Category Factory
-     * @param \Magento\Framework\App\State                       $_state              Area Code
-     * @param \Magento\Config\Model\ResourceModel\Config         $resourceConfig      Resoource config
-     * @param \Magento\Theme\Model\ResourceModel\Theme\Collection $themeCollection    Theme Collection
-     * @param \Magento\Theme\Model\Theme\Registration            $themeRegistration   Theme Registration
-     * @param \Magento\SalesSequence\Model\EntityPool             $entityPool           Entity Pool
-     * @param \Magento\SalesSequence\Model\Builder              $sequenceBuilder       Sequence Builder
-     * @param  \Magento\SalesSequence\Model\Config              $sequenceConfig         Sequence Config
+     * InstallData constructor.
+     * @param \Magento\Store\Api\Data\StoreInterfaceFactory $_storeView
+     * @param \Magento\Store\Api\StoreRepositoryInterfaceFactory $storeRepositoryFactory
+     * @param \Magento\Store\Api\Data\WebsiteInterfaceFactory $_websiteFactory
+     * @param \Magento\Store\Api\Data\GroupInterfaceFactory $_groupFactory
+     * @param \Magento\Store\Api\GroupRepositoryInterfaceFactory $groupRepositoryFactory
+     * @param \Magento\Store\Model\ResourceModel\Group $_groupResourceModel
+     * @param \Magento\Catalog\Api\Data\CategoryInterfaceFactory $_categoryFactory
+     * @param \Magento\Framework\App\State $_state
+     * @param \Magento\Config\Model\ResourceModel\Config $resourceConfig
+     * @param \Magento\Theme\Model\ResourceModel\Theme\Collection $themeCollection
+     * @param \Magento\Theme\Model\Theme\Registration $themeRegistration
+     * @param \Magento\SalesSequence\Model\EntityPool $entityPool
+     * @param \Magento\SalesSequence\Model\Builder $sequenceBuilder
+     * @param \Magento\SalesSequence\Model\Config $sequenceConfig
      */
     public function __construct(
         \Magento\Store\Api\Data\StoreInterfaceFactory $_storeView,
+        \Magento\Store\Api\StoreRepositoryInterfaceFactory $storeRepositoryFactory,
         \Magento\Store\Api\Data\WebsiteInterfaceFactory $_websiteFactory,
         \Magento\Store\Api\Data\GroupInterfaceFactory $_groupFactory,
+        \Magento\Store\Api\GroupRepositoryInterfaceFactory $groupRepositoryFactory,
         \Magento\Store\Model\ResourceModel\Group $_groupResourceModel,
         \Magento\Catalog\Api\Data\CategoryInterfaceFactory $_categoryFactory,
         \Magento\Framework\App\State $_state,
@@ -137,8 +147,10 @@ class InstallData implements Setup\InstallDataInterface
     ) {
     
         $this->storeView = $_storeView;
+        $this->storeRepositoryFactory = $storeRepositoryFactory;
         $this->websiteFactory = $_websiteFactory;
         $this->groupFactory = $_groupFactory;
+        $this->groupRepositoryFactory = $groupRepositoryFactory;
         $this->groupResourceModel = $_groupResourceModel;
         $this->categoryFactory = $_categoryFactory;
         $this->config = include 'Config.php';
@@ -181,7 +193,13 @@ class InstallData implements Setup\InstallDataInterface
 
         //create venia group/store
         if ($website->getId()) {
+
             $group = $this->groupFactory->create();
+            //Check if group exists. if it does, load and update
+            $existingGroupId = $this->getExistingGroupId($this->config['newGroupCode']);
+            if($existingGroupId !=0) {
+                $group->load($existingGroupId);
+            }
             $group->setWebsiteId($website->getWebsiteId());
             $group->setName($this->config['groupName']);
             $group->setRootCategoryId($rootCategoryId);
@@ -191,6 +209,11 @@ class InstallData implements Setup\InstallDataInterface
 
             //create view
             $newStore = $this->storeView->create();
+            //check if view exists, if it does load and update
+            $existingStoreId = $this->getExistingStoreId($this->config['newViewCode']);
+            if($existingStoreId !=0){
+                $newStore->load($existingStoreId);
+            }
             $newStore->setName($this->config['newViewName']);
             $newStore->setCode($this->config['newViewCode']);
             $newStore->setWebsiteId($website->getId());
@@ -202,6 +225,7 @@ class InstallData implements Setup\InstallDataInterface
             //assign view as default on Venia store
             $group->setDefaultStoreId($newStore->getId());
             $group->save();
+
             //add sequences
             foreach ($this->entityPool->getEntities() as $entityType) {
                 $this->sequenceBuilder->setPrefix($this->sequenceConfig->get('prefix'))
@@ -226,7 +250,7 @@ class InstallData implements Setup\InstallDataInterface
             $lumaStoreId=$lumaStore->load('default')->getId();
             $this->_resourceConfig->saveConfig("general/store_information/description", $this->config['lumaDescription'], "stores", $lumaStoreId);
         } else {
-            throw new \Magento\Framework\Exception\LocalizedException(__("default website does not exist, or venia already created"));
+            throw new \Magento\Framework\Exception\LocalizedException(__("default website does not exist"));
 
         }
 
@@ -256,5 +280,37 @@ class InstallData implements Setup\InstallDataInterface
             $category->save();
             return $category->getId();
 
+    }
+
+    /**
+     * @param $groupCode string
+     * @return int
+     */
+    public function getExistingGroupId($groupCode){
+        $groupRepository = $this->groupRepositoryFactory->create();
+        $groups=$groupRepository->getList();
+        foreach($groups as $group){
+            if($group->getCode()==$groupCode){
+                return $group->getId();
+                break;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * @param $storeCode string
+     * @return int
+     */
+    public function getExistingStoreId($storeCode){
+        $storeRepository = $this->storeRepositoryFactory->create();
+        $stores=$storeRepository->getList();
+        foreach($stores as $store){
+            if($store->getCode()==$storeCode){
+                return $store->getId();
+                break;
+            }
+        }
+        return 0;
     }
 }
