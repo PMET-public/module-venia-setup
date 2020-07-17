@@ -36,9 +36,7 @@
             <module name="Magento_WidgetSampleData"/>
             <module name="Magento_WishlistSampleData"/>
             <module name="MagentoEse_ProductBadge"/>
-            <module name="MagentoEse_ProductBadgeSampleData"/>
-            <module name="MagentoEse_InStorePickup"/>
-            <module name="MagentoEse_InStorePickupSampleData"/>
+<!--            <module name="MagentoEse_ProductBadgeSampleData"/>-->
             <module name="MagentoEse_LumaDESetup"/>
             <module name="MagentoEse_LumaDEAttributes"/>
             <module name="MagentoEse_LumaDECategories"/>
