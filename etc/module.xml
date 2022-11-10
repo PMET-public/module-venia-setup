@@ -39,12 +39,6 @@
             <module name="MagentoEse_ProductBadgeSampleData"/>
             <module name="MagentoEse_InStorePickup"/>
             <module name="MagentoEse_InStorePickupSampleData"/>
-            <module name="MagentoEse_LumaDESetup"/>
-            <module name="MagentoEse_LumaDEAttributes"/>
-            <module name="MagentoEse_LumaDECategories"/>
-            <module name="MagentoEse_LumaDECms"/>
-            <module name="MagentoEse_LumaDEProducts"/>
-            <module name="MagentoEse_LumaDEWidget"/>
             <module name="MagentoEse_InstallationOverrides"/>
             <module name="MagentoEse_LookBook"/>
             <module name="Magento_VisualMerchandiser"/>
