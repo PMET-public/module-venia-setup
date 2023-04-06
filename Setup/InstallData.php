@@ -44,35 +44,35 @@ class InstallData implements Setup\InstallDataInterface
      *
      * @var \Magento\Store\Api\Data\WebsiteInterfaceFactory
      */
-    private $_websiteFactory;
+    private $websiteFactory;
 
     /**
      * Group Factory
      *
      * @var \Magento\Store\Api\Data\GroupInterfaceFactory
      */
-    private $_groupFactory;
+    private $groupFactory;
 
     /**
      * Group Resource
      *
      * @var \Magento\Store\Model\ResourceModel\Group
      */
-    private $_groupResourceModel;
+    private $groupResourceModel;
 
     /**
      * Category Factory
      *
      * @var \Magento\Catalog\Api\Data\CategoryInterfaceFactory
      */
-    private $_categoryFactory;
+    private $categoryFactory;
 
     /**
      * Area Code
      *
      * @var \Magento\Framework\App\State
      */
-    private $_state;
+    private $state;
 
     /**
      * Resource Configuration
@@ -111,6 +111,24 @@ class InstallData implements Setup\InstallDataInterface
      * @var \Magento\SalesSequence\Model\Config
      */
     private $sequenceConfig;
+
+    /**
+     * 
+     * @var Magento\Store\Api\Data\StoreInterfaceFactory
+     */
+    private $storeView;
+
+    /**
+     * 
+     * @var array
+     */
+    private $config;
+
+    /**
+     * 
+     * @var Magento\Store\Api\GroupRepositoryInterfaceFactory
+     */
+    private $groupRepositoryFactory;
 
     /**
      * InstallData constructor.
@@ -154,7 +172,7 @@ class InstallData implements Setup\InstallDataInterface
         $this->groupResourceModel = $_groupResourceModel;
         $this->categoryFactory = $_categoryFactory;
         $this->config = include 'Config.php';
-        $this->_resourceConfig = $resourceConfig;
+        $this->resourceConfig = $resourceConfig;
         $this->themeCollection = $themeCollection;
         $this->themeRegistration = $themeRegistration;
         $this->entityPool = $entityPool;
@@ -242,13 +260,13 @@ class InstallData implements Setup\InstallDataInterface
             $this->themeRegistration->register();
             $themeId = $this->themeCollection->getThemeByFullPath('frontend/MagentoEse/venia')->getThemeId();
             //set theme for Venia store
-            $this->_resourceConfig->saveConfig("design/theme/theme_id", $themeId, "stores", $newStore->getId());
+            $this->resourceConfig->saveConfig("design/theme/theme_id", $themeId, "stores", $newStore->getId());
             //set venia description used by store switcher
-            $this->_resourceConfig->saveConfig("general/store_information/description", $this->config['veniaDescription'], "stores", $newStore->getId());
+            $this->resourceConfig->saveConfig("general/store_information/description", $this->config['veniaDescription'], "stores", $newStore->getId());
             //set luma description used by store switcher
             $lumaStore = $this->storeView->create();
             $lumaStoreId=$lumaStore->load('default')->getId();
-            $this->_resourceConfig->saveConfig("general/store_information/description", $this->config['lumaDescription'], "stores", $lumaStoreId);
+            $this->resourceConfig->saveConfig("general/store_information/description", $this->config['lumaDescription'], "stores", $lumaStoreId);
         } else {
             throw new \Magento\Framework\Exception\LocalizedException(__("default website does not exist"));
 
